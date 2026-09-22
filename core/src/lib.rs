@@ -5,3 +5,5 @@
 //! the application repository.
 
 pub mod error;
+
+pub mod connection;
