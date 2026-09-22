@@ -13,3 +13,5 @@ pub mod database;
 pub mod credential;
 
 pub mod db;
+
+pub mod workspace;
