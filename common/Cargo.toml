@@ -1,6 +1,6 @@
 [package]
 name = "roc_desk_common"
-version = "0.1.0"
+version = "0.3.0"
 edition = "2021"
 license-file = "../../LICENSE"
 
@@ -8,3 +8,8 @@ license-file = "../../LICENSE"
 roc_desk_core = { path = "../core" }
 async-trait = "0.1"
 serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "process"] }
+encoding_rs = "0.8"
+goblin = "0.9"
+chrono = "0.4"
+zip = { version = "2", default-features = false, features = ["deflate"] }
