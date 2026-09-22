@@ -1,0 +1,8 @@
+[package]
+name = "roc_desk_common"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+
+[dependencies]
+roc_desk_core = { path = "../core" }

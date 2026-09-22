@@ -1,0 +1,12 @@
+[package]
+name = "roc_desk_core"
+version = "0.1.0"
+edition = "2021"
+license-file = "../../LICENSE"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+rusqlite = { version = "0.39", features = ["bundled"] }
+r2d2 = "0.8"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
