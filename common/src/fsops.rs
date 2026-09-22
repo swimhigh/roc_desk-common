@@ -36,3 +36,5 @@ pub trait FileOps: Send + Sync {
     async fn delete(&self, path: &str, is_dir: bool) -> Result<(), AppError>;
     async fn create_dir(&self, path: &str) -> Result<(), AppError>;
 }
+pub mod local;
+pub use local::LocalFileOps;
