@@ -6,3 +6,5 @@ license-file = "../../LICENSE"
 
 [dependencies]
 roc_desk_core = { path = "../core" }
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
