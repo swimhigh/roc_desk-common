@@ -9,3 +9,7 @@ pub mod error;
 pub mod connection;
 
 pub mod database;
+
+pub mod credential;
+
+pub mod db;
