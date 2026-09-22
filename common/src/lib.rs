@@ -8,3 +8,4 @@ pub mod encoding;
 pub mod fsops;
 pub mod jar_info;
 pub mod office_convert;
+pub mod symbols;

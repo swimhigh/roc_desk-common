@@ -1,6 +1,6 @@
 [package]
 name = "roc_desk_common"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 license-file = "../../LICENSE"
 
@@ -13,3 +13,4 @@ encoding_rs = "0.8"
 goblin = "0.9"
 chrono = "0.4"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+regex = "1"
