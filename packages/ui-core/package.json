@@ -1,8 +1,20 @@
 {
   "name": "@roc_desk/ui-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts", "./bindings": "./src/bindings.ts" },
-  "peerDependencies": { "react": ">=18", "react-dom": ">=18" }
+  "exports": {
+    ".": "./src/index.ts",
+    "./bindings": "./src/bindings.ts",
+    "./styles/theme.css": "./src/styles/theme.css",
+    "./styles/core.css": "./src/styles/core.css"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "zustand": "^5",
+    "lucide-react": "^0.400"
+  }
 }

@@ -1,0 +1,313 @@
+/* 从宿主 roc_desk 的 src-web/src/styles/components.css 里抽出来的"通用设计系统"
+ * 部分（按钮/弹窗/Toast/右键菜单/文件树/文件列表/标签页/工具栏这些跨工具复用的
+ * 类名），本文件之外的、某个工具专属的样式（比如 SQL 结果表格、终端配色）不在
+ * 这里，各工具自己按需补充。依赖 `theme.css` 里定义的 CSS 变量。 */
+
+/* === Button === */
+.btn {
+  height: 32px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: var(--bg-surface-raised);
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.btn.sm { height: 24px; padding: 0 var(--space-3); font-size: var(--text-xs); }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary:hover { opacity: 0.9; }
+.btn.ghost { border: 1px solid var(--border-default); color: var(--text-secondary); background: transparent; }
+.btn.ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn.ghost.active { background: var(--bg-selected); color: var(--accent); border-color: var(--accent); }
+.btn.success { background: var(--success); color: #000; }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger-strong { background: var(--danger); color: #fff; font-weight: 500; }
+.btn.weak { color: var(--text-disabled); font-size: var(--text-xs); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* === Dialog（ConfirmDialog 的基座） === */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.dialog {
+  min-width: 380px;
+  max-width: 480px;
+  background: var(--bg-surface-raised);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.dialog-title-bar {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dialog-title-bar.info { color: var(--info); }
+.dialog-title-bar.warning { color: var(--warning); }
+.dialog-title-bar.danger { background: var(--danger); color: #fff; }
+.dialog-body {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+.dialog-actions {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* === Toast === */
+.toast {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow);
+  max-width: 360px;
+  cursor: pointer;
+}
+.toast.success { background: rgba(63, 185, 80, 0.15); border: 1px solid var(--success); color: var(--success); }
+.toast.info { background: rgba(88, 166, 255, 0.15); border: 1px solid var(--info); color: var(--info); }
+.toast.error { background: rgba(229, 83, 75, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+.toast-stack {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 2000;
+}
+
+/* === Context Menu（文件树右键菜单，参考 VS Code） === */
+.context-menu {
+  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: 4px 0;
+  z-index: 2000;
+  font-size: var(--text-sm);
+}
+.context-menu-item { padding: 5px 14px; cursor: pointer; color: var(--text-primary); }
+.context-menu-item:hover { background: var(--bg-hover); }
+.context-menu-item.danger { color: var(--danger); }
+.context-menu-item.danger:hover { background: rgba(229, 83, 75, 0.1); }
+.context-menu-sep { height: 1px; background: var(--border-subtle); margin: 4px 0; }
+
+/* === Form input === */
+.form-input, .form-select {
+  height: 30px;
+  padding: 0 var(--space-2);
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+
+/* === 文件树（资源管理器/编辑器左侧面板共用） === */
+.project-tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+  user-select: none;
+}
+.tree-item {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tree-item:hover { background: var(--bg-hover); }
+.tree-item.active { background: var(--bg-selected); }
+.tree-item.multi-selected { background: var(--bg-selected); }
+.tree-item .tree-icon { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-secondary); }
+.tree-item .tree-icon.is-dir { color: #dcb67a; }
+.tree-item .tree-name { overflow: hidden; text-overflow: ellipsis; }
+.tree-rename-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-app);
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  padding: 0 2px;
+  height: 18px;
+}
+
+/* === Tab bar（工具窗口顶部） === */
+.tab-bar {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  padding-left: var(--space-2);
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+.tab-bar .app-icon { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+.workspace-name-btn {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: var(--space-2);
+  flex-shrink: 0;
+}
+.workspace-name-btn:hover { background: var(--bg-hover); }
+
+/* === 工具栏图标按钮 === */
+.quick-tool-btn {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.quick-tool-btn svg { width: 16px; height: 16px; }
+.quick-tool-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.quick-tool-btn.active { background: var(--bg-selected); color: var(--accent); }
+.quick-tool-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.quick-tool-btn:disabled:hover { background: none; color: var(--text-secondary); }
+
+/* === 侧边栏/双栏分隔条拖拽手柄 === */
+.sidebar-resize-handle {
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--border-default);
+  position: relative;
+}
+.sidebar-resize-handle:hover, .sidebar-resize-handle:active { background: var(--accent); }
+
+/* === Total Commander 风格底部功能键栏（F3-F8） === */
+.commander-function-bar { display: flex; justify-content: center; height: 34px; border-top: 1px solid var(--border-subtle); background: var(--bg-surface); }
+.commander-function-bar button { flex: 0 1 150px; min-width: 74px; border: 0; border-right: 1px solid var(--border-subtle); background: transparent; color: var(--text-primary); font-size: 12px; cursor: pointer; }
+.commander-function-bar button:hover:not(:disabled) { background: var(--bg-hover); }
+.commander-function-bar button:disabled { color: var(--text-disabled); cursor: default; }
+.commander-function-bar kbd { font-family: var(--font-mono); margin-right: 6px; color: var(--text-secondary); background: var(--bg-app); border-radius: 3px; padding: 1px 4px; }
+
+/* === 双栏文件浏览器（SFTP/资源管理器共用） === */
+.sftp-toolbar {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+.sftp-filter-bar {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+.file-header, .file-row {
+  display: grid;
+  grid-template-columns: 2fr 100px 140px;
+  align-items: center;
+  height: var(--list-row-height);
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  gap: var(--space-2);
+}
+.file-header {
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  background: var(--bg-app);
+}
+.file-row { color: var(--text-primary); cursor: pointer; }
+.file-row:hover { background: var(--bg-hover); }
+.file-row.selected { background: var(--bg-selected); }
+.file-row .file-icon { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-secondary); }
+.file-row .file-icon.is-dir { color: #dcb67a; }
+.file-row .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-row .file-size, .file-row .file-time { color: var(--text-secondary); font-family: var(--font-mono); font-size: var(--text-xs); }
+
+/* === 资源管理器模块标签页（每栏可开多个目录标签） === */
+.explorer-tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  height: 100%;
+  max-width: 150px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-right: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.explorer-tab.active { background: var(--bg-hover); color: var(--text-primary); }
+.explorer-tab:hover { color: var(--text-primary); }
+.explorer-tab-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.explorer-tab-close { flex-shrink: 0; color: var(--text-disabled); cursor: pointer; }
+.explorer-tab-close:hover { color: var(--danger); }
+
+/* === 底部状态/操作栏 === */
+.host-stats-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 26px;
+  padding: 0 var(--space-3);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-default);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
