@@ -8,9 +8,18 @@ license-file = "../../LICENSE"
 roc_desk_core = { path = "../core" }
 async-trait = "0.1"
 serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["rt-multi-thread", "fs", "process"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "process", "macros", "sync", "time"] }
+tokio-util = { version = "0.7", features = ["compat"] }
 encoding_rs = "0.8"
 goblin = "0.9"
 chrono = "0.4"
 zip = { version = "2", default-features = false, features = ["deflate"] }
 regex = "1"
+tauri = { version = "2" }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+futures-util = "0.3"
+uuid = { version = "1", features = ["v4", "serde"] }
+sha2 = "0.10"
+tracing = "0.1"
+rusqlite = { version = "0.39", features = ["bundled"] }
