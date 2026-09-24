@@ -2,12 +2,18 @@
 //! used by coding/editing-style tools (`roc_desk-workspace` today; the
 //! resource manager could adopt it later for a "recent folders" list).
 //!
-//! Ported from the host's `src-tauri/src/workspace/` module. **Local-only**:
-//! the host's original also supported remote (SSH/Agent) workspaces backed by
-//! `roc_desk-ssh`'s connection pools, but that tool hasn't been split out of
-//! the host yet, so remote workspace support is deliberately left as a
-//! host-only concept for now. See `docs/MULTI_REPO_SPLIT_PROGRESS.md`
-//! ("编程工作区" section) in the host repository for the full context.
+//! Ported from the host's `src-tauri/src/workspace/` module. Remote (SSH/
+//! Agent) workspaces are supported at the *profile/DB* level (see
+//! `WorkspaceKind::Remote`, `open_remote` below), but this crate stays
+//! dependency-light and never depends on `roc_desk-ssh` directly -- it can't
+//! resolve a `connection_id` to an actual connection or `FileOps`, and it
+//! can't itself probe a remote host for an embedded `.rock_desk/
+//! workspace.json` marker the way `open_local` does for local folders.
+//! Callers that do have `roc_desk-ssh` access (`roc_desk-workspace`'s own
+//! wrapper around this type) are expected to do that half themselves and
+//! hand `open_remote` whatever embedded workspace id they found. See
+//! `docs/MULTI_REPO_SPLIT_PROGRESS.md` ("编程工作区" section) in the host
+//! repository for the full context.
 
 mod profile;
 mod repo;
@@ -31,6 +37,7 @@ pub struct WorkspaceMetadata {
     pub workspace_id: Uuid,
     pub kind: WorkspaceKind,
     pub root_path: String,
+    pub connection_id: Option<Uuid>,
 }
 
 fn metadata_for(profile: &WorkspaceProfile) -> WorkspaceMetadata {
@@ -38,6 +45,7 @@ fn metadata_for(profile: &WorkspaceProfile) -> WorkspaceMetadata {
         workspace_id: profile.id,
         kind: profile.kind,
         root_path: profile.root_path.clone(),
+        connection_id: profile.connection_id,
     }
 }
 
@@ -96,8 +104,11 @@ impl WorkspaceManager {
                     .unwrap_or_else(Uuid::new_v4),
                 kind: WorkspaceKind::Local,
                 root_path: path.to_string(),
+                connection_id: None,
                 display_name,
                 last_opened_at: Some(Utc::now().to_rfc3339()),
+                last_sftp_local_path: None,
+                last_sftp_remote_path: None,
             },
         };
         self.repo.upsert(&profile)?;
@@ -113,9 +124,51 @@ impl WorkspaceManager {
         Ok(profile)
     }
 
+    /// Opens (or re-finds) a remote workspace's saved profile entry. Unlike
+    /// `open_local`, this crate has no `roc_desk-ssh` access, so it can't
+    /// itself probe the remote host for an embedded `.rock_desk/
+    /// workspace.json` marker or write one back there -- the caller does
+    /// that half (it has a resolved `FileOps` for the connection) and passes
+    /// in whatever embedded workspace id it found, plus a display name it
+    /// computed from the connection's host/username. Returns the profile;
+    /// the caller still needs to write the fallback-cache copy of the
+    /// metadata itself is *not* required here since `write_fallback_metadata`
+    /// below already does that (mirrors `open_local`).
+    pub fn open_remote(
+        &self,
+        connection_id: Uuid,
+        remote_path: &str,
+        display_name: String,
+        embedded_workspace_id: Option<Uuid>,
+    ) -> Result<WorkspaceProfile, AppError> {
+        let profile = match self.repo.find_by_remote(connection_id, remote_path)? {
+            Some(mut existing) => {
+                existing.last_opened_at = Some(Utc::now().to_rfc3339());
+                existing
+            }
+            None => WorkspaceProfile {
+                id: embedded_workspace_id.unwrap_or_else(Uuid::new_v4),
+                kind: WorkspaceKind::Remote,
+                root_path: remote_path.to_string(),
+                connection_id: Some(connection_id),
+                display_name,
+                last_opened_at: Some(Utc::now().to_rfc3339()),
+                last_sftp_local_path: None,
+                last_sftp_remote_path: None,
+            },
+        };
+        self.repo.upsert(&profile)?;
+        let metadata = metadata_for(&profile);
+        self.write_fallback_metadata(&metadata)?;
+        Ok(profile)
+    }
+
     /// Edits an already-saved workspace's directory in place (user feedback
     /// ported from the host: "picked the wrong folder, could only delete and
-    /// re-add").
+    /// re-add"). Local-only -- same reasoning as `open_remote` above applies
+    /// to why a remote-path edit can't live here (needs `FileOps` to probe
+    /// the new remote directory's reachability); the caller handles that
+    /// case itself and only calls into this type for the local branch.
     pub fn update_path(&self, id: Uuid, new_path: &str) -> Result<WorkspaceProfile, AppError> {
         let mut profile = self
             .repo
@@ -152,6 +205,17 @@ impl WorkspaceManager {
 
     pub fn remove_from_recent(&self, id: Uuid) -> Result<(), AppError> {
         self.repo.remove(id)
+    }
+
+    /// The SFTP/Agent dual-pane browser calls this on every navigation --
+    /// both arguments are the *current* values, not a delta.
+    pub fn update_last_sftp_paths(
+        &self,
+        id: Uuid,
+        local_path: &str,
+        remote_path: &str,
+    ) -> Result<(), AppError> {
+        self.repo.update_last_sftp_paths(id, local_path, remote_path)
     }
 
     pub fn ensure_schema(&self) -> Result<(), AppError> {
