@@ -5,6 +5,7 @@
 pub use roc_desk_core as core;
 pub mod agent_confirm;
 pub mod agent_llm;
+pub mod agent_todo;
 pub mod ai;
 pub mod binary_info;
 pub mod encoding;
