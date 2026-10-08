@@ -64,6 +64,15 @@ impl WorkspaceManager {
         Self { repo, cache_root }
     }
 
+    /// Exposes the fallback-cache root directory so a caller building a
+    /// runtime `WorkspaceHandle` can compute the same per-workspace fallback
+    /// directory (`cache_root.join(workspace_id)`) this type itself uses for
+    /// `write_fallback_metadata` -- e.g. to mirror a second, best-effort copy
+    /// of data that's primarily stored in the workspace directory itself.
+    pub fn cache_root(&self) -> &Path {
+        &self.cache_root
+    }
+
     fn write_fallback_metadata(&self, metadata: &WorkspaceMetadata) -> Result<(), AppError> {
         let dir = self.cache_root.join(metadata.workspace_id.to_string());
         std::fs::create_dir_all(&dir)?;
