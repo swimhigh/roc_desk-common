@@ -1,9 +1,66 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Emitter};
+use uuid::Uuid;
 
 use roc_desk_core::error::AppError;
 
 use crate::encoding::decode_text_detect;
+
+/// Shared error text for a transfer aborted via `should_cancel()` --
+/// callers (e.g. a Tauri command wrapping `copy_between`) match on this
+/// exact string to distinguish "user cancelled" from "genuinely failed"
+/// when recording outcome/status.
+pub const TRANSFER_CANCELLED_MESSAGE: &str = "传输已取消";
+
+/// Copies a file or directory tree between two (possibly different)
+/// `FileOps` implementations -- read raw bytes from `src`, write them to
+/// `dst`, recursing into subdirectories. Used wherever a transfer crosses
+/// two different storage backends (e.g. a local file imported into a
+/// remote workspace) and therefore can't use a single implementation's own
+/// `copy` (which only supports copying within itself).
+pub async fn copy_between(
+    src: &dyn FileOps,
+    src_path: &str,
+    dst: &dyn FileOps,
+    dst_path: &str,
+    is_dir: bool,
+    progress: &Option<(AppHandle, Uuid)>,
+    should_cancel: &(dyn Fn() -> bool + Send + Sync),
+    file_count: &std::sync::atomic::AtomicU64,
+) -> Result<(), AppError> {
+    if should_cancel() {
+        return Err(AppError::Internal(TRANSFER_CANCELLED_MESSAGE.into()));
+    }
+    if !is_dir {
+        let (bytes, _) = src.read_file_raw(src_path).await?;
+        dst.write_file_bytes(dst_path, &bytes, None).await?;
+        file_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        if let Some((app, request_id)) = progress {
+            let _ = app.emit(
+                "agent:transfer-progress",
+                serde_json::json!({ "requestId": request_id, "path": src_path }),
+            );
+        }
+        return Ok(());
+    }
+    dst.create_dir(dst_path).await?;
+    for entry in src.list_dir(src_path).await? {
+        let child_dst = format!("{}/{}", dst_path.trim_end_matches(['/', '\\']), entry.name);
+        Box::pin(copy_between(
+            src,
+            &entry.path,
+            dst,
+            &child_dst,
+            entry.is_dir,
+            progress,
+            should_cancel,
+            file_count,
+        ))
+        .await?;
+    }
+    Ok(())
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FileEntry {
