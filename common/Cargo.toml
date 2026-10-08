@@ -25,3 +25,4 @@ tracing = "0.1"
 rusqlite = { version = "0.39", features = ["bundled"] }
 base64 = "0.22"
 pdf-extract = "0.12.1"
+similar = "2"

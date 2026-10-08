@@ -8,6 +8,7 @@ pub mod agent_llm;
 pub mod agent_todo;
 pub mod ai;
 pub mod binary_info;
+pub mod change_store;
 pub mod encoding;
 pub mod fsops;
 pub mod jar_info;
