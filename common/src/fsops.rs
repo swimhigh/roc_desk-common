@@ -211,4 +211,6 @@ pub trait FileOps: Send + Sync {
 }
 
 pub mod local;
+pub mod search;
 pub use local::LocalFileOps;
+pub use search::{search_stream, SearchFileResult, SearchMatch, SearchMode, SearchOptions};
